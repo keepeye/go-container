@@ -122,3 +122,10 @@ Release Call all release functions
 刷新容器实例缓存和释放函数
 
 Refresh Clear resolved service and release functions
+
+
+贡献(Contribute)
+======
+
+你有任何好的想法，都可以创建 issue ，或者通过 pull-request 帮我完善这个项目
+If you have any good ideas, you can create issue, or help me improve this project through pull-request.
