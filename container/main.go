@@ -67,6 +67,12 @@ func (c *Container) Bind(name interface{}, service func(c *Container) interface{
 	c.mutex.Unlock()
 }
 
+//Singleton register a shared service
+func Singleton(name interface{}, service func(c *Container) interface{}) {c.Singleton(name, service)}
+func (c *Container) Singleton(name interface{}, service func(c *Container) interface{}) {
+	c.Bind(name, service, true)
+}
+
 //Instance register a resolved instance
 //it's actually going to be converted to a shared service
 func Instance(name interface{}, instance interface{}) { c.Instance(name, instance) }
