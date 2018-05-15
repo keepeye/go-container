@@ -1,37 +1,37 @@
 package container
 
 import (
-"sync"
+	"sync"
 )
 
 //sliceCap cap of release-function slice
-const sliceCap  = 10
+const sliceCap = 10
 
 // default container
 var c = NewContainer()
 
 //Definition definition of a service
 type Definition struct {
-	Name interface{}
+	Name    interface{}
 	Service func(c *Container) interface{}
-	Shared bool
+	Shared  bool
 }
 
 //NewContainer create a new container
 func NewContainer() *Container {
 	return &Container{
 		definitions: make(map[interface{}]*Definition),
-		resolved: make(map[interface{}]interface{}),
-		r: make([]func(), 0, sliceCap),
+		resolved:    make(map[interface{}]interface{}),
+		r:           make([]func(), 0, sliceCap),
 	}
 }
 
 //Container define container struct
 type Container struct {
 	definitions map[interface{}]*Definition
-	resolved map[interface{}]interface{}
-	r []func()
-	mutex sync.Mutex
+	resolved    map[interface{}]interface{}
+	r           []func()
+	mutex       sync.Mutex
 }
 
 //Get resolve a service
@@ -39,7 +39,7 @@ func Get(name interface{}) interface{} { return c.Get(name) }
 func (c *Container) Get(name interface{}) interface{} {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
-	if resolved, ok := c.resolved[name];ok {
+	if resolved, ok := c.resolved[name]; ok {
 		return resolved
 	}
 	def, ok := c.definitions[name]
@@ -57,8 +57,8 @@ func (c *Container) Get(name interface{}) interface{} {
 func Bind(name interface{}, service func(c *Container) interface{}, shared bool) { c.Bind(name, service, shared) }
 func (c *Container) Bind(name interface{}, service func(c *Container) interface{}, shared bool) {
 	def := &Definition{
-		Name: name,
-		Shared: shared,
+		Name:    name,
+		Shared:  shared,
 		Service: service,
 	}
 	c.mutex.Lock()
@@ -68,7 +68,7 @@ func (c *Container) Bind(name interface{}, service func(c *Container) interface{
 }
 
 //Singleton register a shared service
-func Singleton(name interface{}, service func(c *Container) interface{}) {c.Singleton(name, service)}
+func Singleton(name interface{}, service func(c *Container) interface{}) { c.Singleton(name, service) }
 func (c *Container) Singleton(name interface{}, service func(c *Container) interface{}) {
 	c.Bind(name, service, true)
 }
@@ -110,7 +110,7 @@ func (c *Container) BeforeRelease(f func()) {
 //Release call all release functions
 func Release() { c.Release() }
 func (c *Container) Release() {
-	for _,f := range c.r {
+	for _, f := range c.r {
 		f()
 	}
 }
