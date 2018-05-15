@@ -12,7 +12,7 @@
 - 注册服务支持工厂函数、实例对象
 - You can register factory function or an instance to container
 - 支持刷新容器，清空实例缓存，下次获取服务重新调用工厂函数生成
-- Support refresh instance cache, then you get service, will resolve again
+- Support refresh instance cache, so that you resolve service again
 - 支持添加释放回调函数，当释放容器的时候触发，用于释放数据库等连接
 - Support register release function so when your program end, you can release some resource such as database connection.
 
@@ -82,10 +82,15 @@ Get Resolve a service
 
 ### Bind(name interface{}, service func(c *Container) interface{}, shared bool)
 
-绑定一个服务，如果share=true，那么这个服务是单例的，工厂函数只会执行一次
+注册一个服务，如果share=true，那么这个服务是单例的，工厂函数只会执行一次
 
 Bind Bind a service, if shared is true, the service will resolve only once
 
+### Singleton(name interface{}, service func(c *Container) interface{})
+
+注册一个共享单例服务
+
+Register a shared service
 
 ### Instance(name interface{}, instance interface{})
 
@@ -99,7 +104,7 @@ Instance Register a resolved instance, it's actually going to be converted to a 
 
 Has Detect if has a service
 
-### func Remove(name interface{})
+### Remove(name interface{})
 
 移除某个服务
 
