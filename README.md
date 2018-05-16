@@ -2,6 +2,7 @@
 =====
 
 这是一个非常简易的容器实现，主要方便嵌入到项目中，方便初始化一些服务，如：数据库、redis、缓存等。
+
 A simple container class implemented by go to facilitate the management of service objects.
 
 
