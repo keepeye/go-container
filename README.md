@@ -21,6 +21,8 @@
 
 ### 安装 (Install)
 
+Require Go 1.9+
+
 ```
 go get github.com/keepeye/go-container
 ```
