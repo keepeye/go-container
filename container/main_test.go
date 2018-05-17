@@ -14,13 +14,13 @@ func TestNewContainer(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	c := NewContainer()
-	c.definitions["foo"] = &Definition{
+	c.definitions.Store("foo", &Definition{
 		Name: "foo",
 		Service: func(c *Container) interface{} {
 			return "foo"
 		},
 		Shared: false,
-	}
+	})
 	v := c.Get("foo")
 	if v.(string) != "foo" {
 		t.Fail()

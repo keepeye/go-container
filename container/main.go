@@ -17,38 +17,36 @@ type Definition struct {
 	Shared  bool
 }
 
+//Container define container struct
+type Container struct {
+	definitions *sync.Map
+	resolved    *sync.Map
+	r           []func()
+}
+
 //NewContainer create a new container
 func NewContainer() *Container {
 	return &Container{
-		definitions: make(map[interface{}]*Definition),
-		resolved:    make(map[interface{}]interface{}),
-		r:           make([]func(), 0, sliceCap),
+		definitions: new(sync.Map), // service definitions
+		resolved:    new(sync.Map), // cached instances
+		r:           make([]func(), 0, sliceCap), // release functions
 	}
-}
-
-//Container define container struct
-type Container struct {
-	definitions map[interface{}]*Definition
-	resolved    map[interface{}]interface{}
-	r           []func()
-	mutex       sync.Mutex
 }
 
 //Get resolve a service
 func Get(name interface{}) interface{} { return c.Get(name) }
 func (c *Container) Get(name interface{}) interface{} {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	if resolved, ok := c.resolved[name]; ok {
+	if resolved, ok := c.resolved.Load(name); ok {
 		return resolved
 	}
-	def, ok := c.definitions[name]
+	v, ok := c.definitions.Load(name)
 	if !ok {
 		return nil
 	}
+	def := v.(*Definition)
 	service := def.Service(c)
 	if def.Shared {
-		c.resolved[name] = service
+		c.resolved.Store(name, service)
 	}
 	return service
 }
@@ -61,10 +59,8 @@ func (c *Container) Bind(name interface{}, service func(c *Container) interface{
 		Shared:  shared,
 		Service: service,
 	}
-	c.mutex.Lock()
-	c.definitions[name] = def
-	delete(c.resolved, name)
-	c.mutex.Unlock()
+	c.definitions.Store(name, def)
+	c.resolved.Delete(name)
 }
 
 //Singleton register a shared service
@@ -86,19 +82,15 @@ func (c *Container) Instance(name interface{}, instance interface{}) {
 //Has detect if has a service
 func Has(name interface{}) bool { return c.Has(name) }
 func (c *Container) Has(name interface{}) bool {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	_, ok := c.definitions[name]
+	_, ok := c.definitions.Load(name)
 	return ok
 }
 
 //Remove remove a service from container
 func Remove(name interface{}) { c.Remove(name) }
 func (c *Container) Remove(name interface{}) {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	delete(c.definitions, name)
-	delete(c.resolved, name)
+	c.definitions.Delete(name)
+	c.resolved.Delete(name)
 }
 
 //BeforeRelease add a function which will be called at releasing
@@ -118,8 +110,6 @@ func (c *Container) Release() {
 //Refresh clear resolved service and release functions
 func Refresh() { c.Refresh() }
 func (c *Container) Refresh() {
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
-	c.resolved = make(map[interface{}]interface{})
+	c.resolved = new(sync.Map)
 	c.r = make([]func(), 0, sliceCap)
 }
